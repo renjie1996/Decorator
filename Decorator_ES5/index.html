@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    var Car = function () {
+      console.log('车架准备就绪')
+    } 
+    Car.prototype = {
+      start: function () {
+        console.log('启动开关准备就绪')
+      },
+      drive: function () {
+        console.log('驾驶开关准备就绪')
+      },
+      getPrice: function () {
+        return 300000
+      }
+    }
+
+    // 接下来装饰器类为它服务吧
+    var CarDecorator = function (car) {
+      this.car = car
+    }
+    CarDecorator.prototype = {
+      start: function () {
+        console.log('改造')
+        this.car.start()
+      },
+      drive: function () {
+        console.log('改造')
+        this.car.drive()
+      },
+      getPrice: function () {
+        return this.car.getPrice()
+      }
+    }
+    // new出的car
+    var carTest1 = new Car()
+    console.log('new Car()', carTest1)
+
+    // 直接作为属性继承的car
+    // var carTest2 = new CarDecorator(carTest1)
+    // console.log('new CarDecorator(carTest1)',carTest2)
+    // // 测试用是使用自己原型链上的的方法，这个方法在调用属性中的方法
+    // carTest2.start()
+
+    // 语法糖super()
+    var PowerLocksDecorator = function (car) {
+      CarDecorator.call(this, car)  // 调用借过来的构造函数
+      console.log('装饰器加强动力栓')
+    }
+
+    // 什么是真正使用的装饰器
+    console.log('PowerLocksDecorator的实例', new PowerLocksDecorator(carTest1))
+
+    // 动力栓继承通用装饰器
+    PowerLocksDecorator.prototype = new CarDecorator()
+
+    PowerLocksDecorator.prototype.drive = function () {
+      // 调用之前的drive方法
+      this.car.drive()
+      console.log('升级驾驶功能-动力栓')
+    }
+
+    var PowerWindowsDecorator = function(car) {
+      CarDecorator.call(this, car);
+      console.log('装配：添加动力表盘');
+    }
+    PowerWindowsDecorator.prototype = new CarDecorator();
+
+    var ACDecorator = function(car) {
+        CarDecorator.call(this, car);
+        console.log('装配：添加空调');
+    }
+    ACDecorator.prototype = new CarDecorator();
+    ACDecorator.prototype.start = function() {
+        this.car.start();
+        console.log('升级启动装置-冷风吹起来');
+    }
+
+    console.log('running')
+    var car = new Car();                    // log打印 "装配(assemble)：组建车架，添加主要部件"
+
+    // 给车装上动力表盘
+    car = new PowerWindowsDecorator(car);    // log打印 "装配：添加动力表盘"
+    console.log('第一次改造后',car)
+    // 现在加装动力锁和空调
+    car = new PowerLocksDecorator(car);     // log打印 "装配：添加动力锁"
+    console.log('第2次改造后',car)
+    car = new ACDecorator(car);             // log打印 "装配：添加空调"
+
+    // 让我们发动这个坏小子出去兜兜风吧!
+    car.start(); // log打印 '伴随着引擎的轰鸣声，车子发动了！' 和 '冷风吹起来'
+    car.drive(); // log打印 '走起!' 和 '车门自动上锁'
+
+    console.log('car', car)
+
+  </script>
+</body>
+</html>
